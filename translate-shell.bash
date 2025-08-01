@@ -15,6 +15,13 @@ _complete_engine() {
 }
 
 _complete_language() {
+    local multiple="$1"
+    if [ "$multiple" ]; then
+        # Without this '+' and whatever precedes it, is removed from the command line.
+        COMP_WORDBREAKS+=+
+        cur="${cur//*+/}"
+    fi
+
     COMPREPLY=($(compgen -W "$(trans -list-codes; trans -list-languages; trans -list-languages-english | sort)" -- "$cur"))
 }
 
@@ -31,13 +38,18 @@ _has_language_delimiter() {
 
 _translate() {
     COMPREPLY=()
+    # Remove '+'s if they are added to this variable in _complete_language(). Maybe not needed?
+    COMP_WORDBREAKS="${COMP_WORDBREAKS//+/}"
     cur="$(_get_cword)"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
     if [ "${prev:0:1}" = "-" ]; then
         case "$prev" in
-            -s|-sl|-source|-from|-t|-tl|-target|-to)
-                _complete_language
+            -s|-sl|-source|-from)
+                _complete_language false
+                ;;
+            -t|-tl|-target|-to)
+                _complete_language true
                 ;;
             -e|-engine)
                 _complete_engine
@@ -47,11 +59,11 @@ _translate() {
         _complete_option
     # Complete shorcut formatted languages.
     elif _has_language_delimiter; then
-        # Remove first language and/or delimiter.
+        # Remove first language and/or delimiter from cur.
         cur="${cur/*[:=]/}"
-        _complete_language
+        _complete_language true
     else
-        _complete_language
+        _complete_language true
     fi
 
     return 0
