@@ -45,10 +45,10 @@ _translate() {
 
     if [ "${prev:0:1}" = "-" ]; then
         case "$prev" in
-            -s|-sl|-source|-from)
+            -s|-sl|-source|-from|-hl|-host)
                 _complete_language false
                 ;;
-            -t|-tl|-target|-to)
+            -t|-tl|-target|-to|-L|-linguist)
                 _complete_language true
                 ;;
             -e|-engine)
